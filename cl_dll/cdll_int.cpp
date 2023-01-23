@@ -38,6 +38,7 @@
 
 cl_enginefunc_t gEngfuncs;
 CHud gHUD;
+CPortalRenderer gPortalRenderer;
 TeamFortressViewport* gViewPort = NULL;
 
 

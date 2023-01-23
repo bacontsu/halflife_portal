@@ -30,6 +30,9 @@
 #include "cl_dll.h"
 #include "ammo.h"
 
+#include "PlatformHeaders.h"
+#include "gl/GL.h"
+
 #define DHN_DRAWZERO 1
 #define DHN_2DIGITS 2
 #define DHN_3DIGITS 4
@@ -481,6 +484,20 @@ private:
 //
 
 
+class CPortalRenderer
+{
+public:
+	void Init();
+	void VidInit();
+	void DrawPortal();
+	void CapturePortalView(int pass);
+
+	GLuint portalPass_1;
+	GLuint portalPass_2;
+	bool m_bIsDrawingPortal;
+};
+
+
 class CHud
 {
 private:
@@ -609,6 +626,7 @@ public:
 };
 
 extern CHud gHUD;
+extern CPortalRenderer gPortalRenderer;
 
 extern int g_iPlayerClass;
 extern int g_iTeamNumber;

@@ -47,8 +47,7 @@ void VectorAngles(const float* forward, float* angles);
 extern engine_studio_api_t IEngineStudio;
 
 extern kbutton_t in_mlook;
-
-/*
+	/*
 The view is allowed to move slightly from it's true position for bobbing,
 but if it exceeds 8 pixels linear distance (spherical, not box), the list of
 entities sent from the server may not include everything in the pvs, especially
@@ -500,6 +499,8 @@ void V_CalcNormalRefdef(struct ref_params_s* pparams)
 	Vector camAngles, camForward, camRight, camUp;
 	cl_entity_t* pwater;
 
+	static int renderpass = 0;
+
 	V_DriftPitch(pparams);
 
 	if (0 != gEngfuncs.IsSpectateOnly())
@@ -838,6 +839,38 @@ void V_CalcNormalRefdef(struct ref_params_s* pparams)
 	lasttime = pparams->time;
 
 	v_origin = pparams->vieworg;
+
+	if (pparams->nextView == 0)
+	{
+		// set view relative to second portal (from first portal view)
+		gPortalRenderer.CapturePortalView(0);
+
+		pparams->nextView = 1;
+		renderpass = 1;
+		return;
+	}
+
+	if (renderpass == 1 && pparams->nextView == 1)
+	{
+		// set view relative to first portal (from second portal view)
+		gPortalRenderer.CapturePortalView(1);
+
+		renderpass = 2;
+		return;
+	}
+
+	if (renderpass == 2 && pparams->nextView == 1)
+	{
+		// reset player view
+		pparams->viewangles[0] = v_angles.x;
+		pparams->viewangles[1] = v_angles.y;
+		pparams->viewangles[2] = v_angles.z;
+		pparams->vieworg[0] = v_origin.x;
+		pparams->vieworg[1] = v_origin.y;
+		pparams->vieworg[2] = v_origin.z;
+		pparams->nextView = 0;
+		renderpass = 0;
+	}
 }
 
 void V_SmoothInterpolateAngles(float* startAngle, float* endAngle, float* finalAngle, float degreesPerSec)
