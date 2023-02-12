@@ -2265,3 +2265,84 @@ void CItemSoda::CanTouch(CBaseEntity* pOther)
 	SetThink(&CItemSoda::SUB_Remove);
 	pev->nextthink = gpGlobals->time;
 }
+
+#include "player.h"
+
+class CPortalEntity : public CBaseEntity
+{
+public:
+	void Spawn() override;
+	void Precache() override;
+	void EXPORT Think() override;
+
+	float m_flPortalCooldown;
+};
+
+LINK_ENTITY_TO_CLASS(ent_portal, CPortalEntity);
+
+void CPortalEntity::Spawn()
+{
+	Precache();
+	pev->solid = SOLID_NOT;
+	pev->movetype = MOVETYPE_NONE;
+
+	SET_MODEL(ENT(pev), "models/portal/portal.mdl");
+	UTIL_SetSize(pev, Vector(0, 0, 0), Vector(0, 0, 0));
+
+	pev->nextthink = gpGlobals->time + 0.01f;
+}
+
+void CPortalEntity::Precache()
+{
+	PRECACHE_MODEL("models/portal/portal.mdl");
+}
+
+void CPortalEntity::Think()
+{
+	pev->nextthink = gpGlobals->time + 0.01f;
+
+	if (m_flPortalCooldown > gpGlobals->time) return;
+
+	CBaseEntity* pFound = UTIL_FindEntityInSphere(nullptr, pev->origin, 20);
+	if (pFound)
+	{
+		if (FClassnameIs(pFound->pev, "ent_portal"))
+			return;
+
+		CBaseEntity* pOwner = CBaseEntity::Instance(pev->owner);
+		if (pOwner)
+		{
+			CBasePlayer* pPlayer = static_cast<CBasePlayer*>(pOwner);
+			if (pPlayer)
+			{
+				CBaseEntity* pOtherPortal = pPlayer->m_pPortal[!((bool)pev->skin)];
+				if (pOtherPortal)
+				{
+					CPortalEntity* pOtherPortalCasted = static_cast<CPortalEntity*>(pOtherPortal);
+					if (pOtherPortalCasted)
+					{
+						Vector teleportOrg = pOtherPortalCasted->pev->origin;
+
+						Vector diff = (pFound->pev->origin - pev->origin);
+
+						Vector forward, right, up;
+						AngleVectors(pOtherPortalCasted->pev->angles, &forward, &right, &up);
+						
+						Vector forwardOffset = forward * diff.x;
+						Vector rightOffset = right * diff.y * -1;
+						Vector upOffset = up * diff.z;
+
+						teleportOrg = teleportOrg + forwardOffset + rightOffset + upOffset;
+						teleportOrg = teleportOrg + forward * 20;
+
+						teleportOrg.z += 20.0f;
+						UTIL_SetOrigin(pFound->pev, teleportOrg);
+						pFound->pev->v_angle.y = pOtherPortalCasted->pev->angles.y; 
+						this->m_flPortalCooldown = pOtherPortalCasted->m_flPortalCooldown = gpGlobals->time + 0.5f;
+					
+					}
+				}
+			}
+		}
+	}
+}

@@ -355,6 +355,9 @@ public:
 
 	//True if the player is currently spawning.
 	bool m_bIsSpawning = false;
+
+	// portal stuff
+	CBaseEntity* m_pPortal[2];
 };
 
 inline void CBasePlayer::SetWeaponBit(int id)

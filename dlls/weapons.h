@@ -499,7 +499,7 @@ public:
 
 	void PrimaryAttack() override;
 	void SecondaryAttack() override;
-	void GlockFire(float flSpread, float flCycleTime, bool fUseAutoAim);
+	void GlockFire(bool state);
 	bool Deploy() override;
 	void Reload() override;
 	void WeaponIdle() override;
