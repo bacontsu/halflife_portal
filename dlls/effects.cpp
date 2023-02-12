@@ -2309,35 +2309,45 @@ void CPortalEntity::Think()
 		if (FClassnameIs(pFound->pev, "ent_portal"))
 			return;
 
+		// Get portal owner
 		CBaseEntity* pOwner = CBaseEntity::Instance(pev->owner);
 		if (pOwner)
 		{
 			CBasePlayer* pPlayer = static_cast<CBasePlayer*>(pOwner);
 			if (pPlayer)
 			{
+				// Get second portal
 				CBaseEntity* pOtherPortal = pPlayer->m_pPortal[!((bool)pev->skin)];
 				if (pOtherPortal)
 				{
 					CPortalEntity* pOtherPortalCasted = static_cast<CPortalEntity*>(pOtherPortal);
 					if (pOtherPortalCasted)
 					{
+						// Get second portal's origin
 						Vector teleportOrg = pOtherPortalCasted->pev->origin;
-
 						Vector diff = (pFound->pev->origin - pev->origin);
 
+						// some offsetting, unfinished!
 						Vector forward, right, up;
-						AngleVectors(pOtherPortalCasted->pev->angles, &forward, &right, &up);
-						
+						AngleVectors(Vector(0, pOtherPortalCasted->pev->angles.y - this->pev->angles.y, 0), &forward, &right, &up);
 						Vector forwardOffset = forward * diff.x;
 						Vector rightOffset = right * diff.y * -1;
 						Vector upOffset = up * diff.z;
 
+						Vector forwardSpeedOffset = forward * pFound->pev->velocity.x * -1;
+						Vector rightSpeedOffset = right * pFound->pev->velocity.y;
+						Vector upSpeedOffset;
+
+						// Apply the offsetting
 						teleportOrg = teleportOrg + forwardOffset + rightOffset + upOffset;
 						teleportOrg = teleportOrg + forward * 20;
-
 						teleportOrg.z += 20.0f;
+
+						// Move someone who touched this
 						UTIL_SetOrigin(pFound->pev, teleportOrg);
-						pFound->pev->v_angle.y = pOtherPortalCasted->pev->angles.y; 
+						pFound->pev->fixangle = 1;
+						pFound->pev->v_angle.y = pFound->pev->angles.y = pFound->pev->angles.y + 180 + (pOtherPortalCasted->pev->angles.y - pev->angles.y); 
+						pFound->pev->velocity = forwardSpeedOffset + rightSpeedOffset + Vector(0, 0, pFound->pev->velocity.z);
 						this->m_flPortalCooldown = pOtherPortalCasted->m_flPortalCooldown = gpGlobals->time + 0.5f;
 					
 					}
