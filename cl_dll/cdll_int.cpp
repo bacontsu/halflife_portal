@@ -184,7 +184,7 @@ redraw the HUD.
 int DLLEXPORT HUD_Redraw(float time, int intermission)
 {
 	//	RecClHudRedraw(time, intermission);
-
+	gPortalRenderer.DrawPortal();
 	gHUD.Redraw(time, 0 != intermission);
 
 	return 1;

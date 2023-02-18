@@ -707,7 +707,7 @@ void V_CalcNormalRefdef(struct ref_params_s* pparams)
 
 		steptime = pparams->time - lasttime;
 		if (steptime < 0)
-			//FIXME		I_Error ("steptime < 0");
+			// FIXME		I_Error ("steptime < 0");
 			steptime = 0;
 
 		oldz += steptime * 150;
@@ -801,7 +801,7 @@ void V_CalcNormalRefdef(struct ref_params_s* pparams)
 		VectorCopy(camAngles, pparams->viewangles);
 	}
 
-	//Apply this at all times
+	// Apply this at all times
 	{
 		float pitch = pparams->viewangles[0];
 
@@ -858,8 +858,6 @@ void V_CalcNormalRefdef(struct ref_params_s* pparams)
 
 			// Apply the offsetting
 			teleportOrg = teleportOrg + forwardOffset + rightOffset + upOffset;
-			//teleportOrg = teleportOrg + forward * -50;
-			//pFound->pev->v_angle.y = pFound->pev->angles.y = pFound->pev->angles.y + 180 + (pOtherPortalCasted->pev->angles.y - pev->angles.y); 
 			float finalYaw = pparams->viewangles[YAW] + 180 + (gPortalRenderer.m_Portal2[1][YAW] - gPortalRenderer.m_Portal1[1][YAW]);
 
 			pparams->vieworg[0] = teleportOrg.x;
@@ -867,9 +865,9 @@ void V_CalcNormalRefdef(struct ref_params_s* pparams)
 			pparams->vieworg[2] = teleportOrg.z;
 			pparams->viewangles[YAW] = finalYaw;
 
-			//gEngfuncs.Con_Printf("org: %f %f %f", gPortalRenderer.m_Portal2[1].y, gPortalRenderer.m_Portal1[1].y, teleportOrg.z);
+			gHUD.portal1finalorg = teleportOrg;
 		}
-
+		gEngfuncs.Con_Printf("portal 1 pass\n");
 		pparams->nextView = 1;
 		renderpass = 1;
 		return;
@@ -877,6 +875,10 @@ void V_CalcNormalRefdef(struct ref_params_s* pparams)
 
 	if (renderpass == 1 && pparams->nextView == 1)
 	{
+		// Capture first portal
+		glFinish();
+		gPortalRenderer.CapturePortalView(0);
+
 		// set view relative to first portal (from second portal view)
 		if (gPortalRenderer.m_Portal1[0] != vec3_origin && gPortalRenderer.m_Portal2[0] != vec3_origin)
 		{
@@ -893,8 +895,6 @@ void V_CalcNormalRefdef(struct ref_params_s* pparams)
 
 			// Apply the offsetting
 			teleportOrg = teleportOrg + forwardOffset + rightOffset + upOffset;
-			// teleportOrg = teleportOrg + forward * -50;
-			// pFound->pev->v_angle.y = pFound->pev->angles.y = pFound->pev->angles.y + 180 + (pOtherPortalCasted->pev->angles.y - pev->angles.y);
 			float finalYaw = pparams->viewangles[YAW] + 180 + (gPortalRenderer.m_Portal1[1][YAW] - gPortalRenderer.m_Portal2[1][YAW]);
 
 			pparams->vieworg[0] = teleportOrg.x;
@@ -902,15 +902,20 @@ void V_CalcNormalRefdef(struct ref_params_s* pparams)
 			pparams->vieworg[2] = teleportOrg.z;
 			pparams->viewangles[YAW] = finalYaw;
 
-			// gEngfuncs.Con_Printf("org: %f %f %f", gPortalRenderer.m_Portal2[1].y, gPortalRenderer.m_Portal1[1].y, teleportOrg.z);
+			gHUD.portal2finalorg = teleportOrg;
 		}
-
+		gEngfuncs.Con_Printf("portal 2 pass\n");
 		renderpass = 2;
+		pparams->nextView = 2;
 		return;
 	}
 
-	if (renderpass == 2 && pparams->nextView == 1)
+	if (renderpass == 2 && pparams->nextView == 2)
 	{
+		// Capture second portal
+		glFinish();
+		gPortalRenderer.CapturePortalView(1);
+
 		// reset player view
 		pparams->viewangles[0] = v_angles.x;
 		pparams->viewangles[1] = v_angles.y;
@@ -918,6 +923,17 @@ void V_CalcNormalRefdef(struct ref_params_s* pparams)
 		pparams->vieworg[0] = v_origin.x;
 		pparams->vieworg[1] = v_origin.y;
 		pparams->vieworg[2] = v_origin.z;
+		gEngfuncs.Con_Printf("world pass\n");
+		pparams->nextView = 3;
+		renderpass = 3;
+		return;
+	}
+
+	if (renderpass == 3 && pparams->nextView == 3)
+	{
+		// Capture screen
+		glFinish();
+		//gPortalRenderer.CapturePortalView(2);
 		pparams->nextView = 0;
 		renderpass = 0;
 	}

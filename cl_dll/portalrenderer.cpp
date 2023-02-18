@@ -42,6 +42,18 @@
 extern void R_SetupScreenStuff();
 extern void R_ResetScreenStuff();
 
+void DrawQuad(int width, int height, int ofsX, int ofsY)
+{
+	glTexCoord2f(ofsX, ofsY);
+	glVertex3f(0, 1, -1);
+	glTexCoord2f(ofsX, height + ofsY);
+	glVertex3f(0, 0, -1);
+	glTexCoord2f(width + ofsX, height + ofsY);
+	glVertex3f(1, 0, -1);
+	glTexCoord2f(width + ofsX, ofsY);
+	glVertex3f(1, 1, -1);
+}
+
 void CPortalRenderer::Init()
 {
 	// create a load of blank pixels to create textures with
@@ -73,17 +85,44 @@ void CPortalRenderer::VidInit()
 
 void CPortalRenderer::DrawPortal()
 {
+	R_SetupScreenStuff();
 
+	glViewport(0, 0, 200, 200);
+	glBindTexture(GL_TEXTURE_RECTANGLE_NV, portalPass_1);
+	glBegin(GL_QUADS);
+	DrawQuad(ScreenWidth, ScreenHeight, 0, 0);
+	glEnd();
+
+	glViewport(200, 0, 200, 200);
+	glBindTexture(GL_TEXTURE_RECTANGLE_NV, portalPass_2);
+	glBegin(GL_QUADS);
+	DrawQuad(ScreenWidth, ScreenHeight, 0, 0);
+	glEnd();
+
+	glViewport(0, 0, ScreenWidth, ScreenHeight);
+
+	if (CVAR_GET_FLOAT("normalscreen") == 1)
+	{
+		glBindTexture(GL_TEXTURE_RECTANGLE_NV, screenpass);
+		glBegin(GL_QUADS);
+		DrawQuad(ScreenWidth, ScreenHeight, 0, 0);
+		glEnd();
+	}
+
+	R_ResetScreenStuff();
 }
 
 void CPortalRenderer::CapturePortalView(int pass)
 {
 	R_SetupScreenStuff();
-	if (pass == 0)
-		glBindTexture(GL_TEXTURE_2D, portalPass_1);
-	else
-		glBindTexture(GL_TEXTURE_2D, portalPass_2);
 
-	glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 0, 0, ScreenWidth, ScreenHeight, 0);
+	if (pass == 0)
+		glBindTexture(GL_TEXTURE_RECTANGLE_NV, portalPass_1);
+	else if (pass == 1)
+		glBindTexture(GL_TEXTURE_RECTANGLE_NV, portalPass_2);
+	else
+		glBindTexture(GL_TEXTURE_RECTANGLE_NV, screenpass);
+
+	glCopyTexImage2D(GL_TEXTURE_RECTANGLE_NV, 0, GL_RGBA8, 0, 0, ScreenWidth, ScreenHeight, 0);
 	R_ResetScreenStuff();
 }

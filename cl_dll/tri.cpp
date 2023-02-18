@@ -82,7 +82,6 @@ void DLLEXPORT HUD_DrawTransparentTriangles()
 {
 	//	RecClDrawTransparentTriangles();
 
-
 	if (g_pParticleMan)
 		g_pParticleMan->Update();
 }
