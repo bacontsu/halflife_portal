@@ -55,4 +55,6 @@ inline int gmsgStatusValue = 0;
 
 inline int gmsgWeapons = 0;
 
+inline int gmsgPortal = 0; 
+
 void LinkUserMessages();

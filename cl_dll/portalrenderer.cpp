@@ -39,6 +39,9 @@
 #define GL_TEXTURE_RECTANGLE_NV 0x84F5
 #endif // !GL_TEXTURE_RECTANGLE_NV
 
+extern void R_SetupScreenStuff();
+extern void R_ResetScreenStuff();
+
 void CPortalRenderer::Init()
 {
 	// create a load of blank pixels to create textures with
@@ -75,10 +78,12 @@ void CPortalRenderer::DrawPortal()
 
 void CPortalRenderer::CapturePortalView(int pass)
 {
+	R_SetupScreenStuff();
 	if (pass == 0)
 		glBindTexture(GL_TEXTURE_2D, portalPass_1);
 	else
 		glBindTexture(GL_TEXTURE_2D, portalPass_2);
 
 	glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 0, 0, ScreenWidth, ScreenHeight, 0);
+	R_ResetScreenStuff();
 }

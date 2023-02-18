@@ -840,10 +840,35 @@ void V_CalcNormalRefdef(struct ref_params_s* pparams)
 
 	v_origin = pparams->vieworg;
 
-	if (pparams->nextView == 0)
+	if (gPortalRenderer.m_bIsDrawingPortal && pparams->nextView == 0)
 	{
 		// set view relative to second portal (from first portal view)
-		gPortalRenderer.CapturePortalView(0);
+		if (gPortalRenderer.m_Portal1[0] != vec3_origin && gPortalRenderer.m_Portal2[0] != vec3_origin)
+		{
+			// Get second portal's origin
+			Vector teleportOrg = gPortalRenderer.m_Portal2[0];
+			Vector diff = (Vector(pparams->vieworg) - gPortalRenderer.m_Portal1[0]);
+
+			// some offsetting, unfinished!
+			Vector forward, right, up;
+			AngleVectors(Vector(0, gPortalRenderer.m_Portal2[1].y - gPortalRenderer.m_Portal1[1].y, 0), forward, right, up);
+			Vector forwardOffset = forward * diff.x * -1;
+			Vector rightOffset = right * diff.y;
+			Vector upOffset = up * diff.z;
+
+			// Apply the offsetting
+			teleportOrg = teleportOrg + forwardOffset + rightOffset + upOffset;
+			//teleportOrg = teleportOrg + forward * -50;
+			//pFound->pev->v_angle.y = pFound->pev->angles.y = pFound->pev->angles.y + 180 + (pOtherPortalCasted->pev->angles.y - pev->angles.y); 
+			float finalYaw = pparams->viewangles[YAW] + 180 + (gPortalRenderer.m_Portal2[1][YAW] - gPortalRenderer.m_Portal1[1][YAW]);
+
+			pparams->vieworg[0] = teleportOrg.x;
+			pparams->vieworg[1] = teleportOrg.y;
+			pparams->vieworg[2] = teleportOrg.z;
+			pparams->viewangles[YAW] = finalYaw;
+
+			//gEngfuncs.Con_Printf("org: %f %f %f", gPortalRenderer.m_Portal2[1].y, gPortalRenderer.m_Portal1[1].y, teleportOrg.z);
+		}
 
 		pparams->nextView = 1;
 		renderpass = 1;
@@ -853,7 +878,32 @@ void V_CalcNormalRefdef(struct ref_params_s* pparams)
 	if (renderpass == 1 && pparams->nextView == 1)
 	{
 		// set view relative to first portal (from second portal view)
-		gPortalRenderer.CapturePortalView(1);
+		if (gPortalRenderer.m_Portal1[0] != vec3_origin && gPortalRenderer.m_Portal2[0] != vec3_origin)
+		{
+			// Get second portal's origin
+			Vector teleportOrg = gPortalRenderer.m_Portal1[0];
+			Vector diff = (Vector(pparams->vieworg) - gPortalRenderer.m_Portal2[0]);
+
+			// some offsetting, unfinished!
+			Vector forward, right, up;
+			AngleVectors(Vector(0, gPortalRenderer.m_Portal1[1].y - gPortalRenderer.m_Portal2[1].y, 0), forward, right, up);
+			Vector forwardOffset = forward * diff.x * -1;
+			Vector rightOffset = right * diff.y;
+			Vector upOffset = up * diff.z;
+
+			// Apply the offsetting
+			teleportOrg = teleportOrg + forwardOffset + rightOffset + upOffset;
+			// teleportOrg = teleportOrg + forward * -50;
+			// pFound->pev->v_angle.y = pFound->pev->angles.y = pFound->pev->angles.y + 180 + (pOtherPortalCasted->pev->angles.y - pev->angles.y);
+			float finalYaw = pparams->viewangles[YAW] + 180 + (gPortalRenderer.m_Portal1[1][YAW] - gPortalRenderer.m_Portal2[1][YAW]);
+
+			pparams->vieworg[0] = teleportOrg.x;
+			pparams->vieworg[1] = teleportOrg.y;
+			pparams->vieworg[2] = teleportOrg.z;
+			pparams->viewangles[YAW] = finalYaw;
+
+			// gEngfuncs.Con_Printf("org: %f %f %f", gPortalRenderer.m_Portal2[1].y, gPortalRenderer.m_Portal1[1].y, teleportOrg.z);
+		}
 
 		renderpass = 2;
 		return;

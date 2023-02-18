@@ -3974,6 +3974,35 @@ void CBasePlayer::UpdateClientData()
 		// cache FOV change at end of function, so weapon updates can see that FOV has changed
 	}
 
+	// Send portal entity over to client
+	if (m_pPortal[0] && m_pPortal[1])
+	{
+		MESSAGE_BEGIN(MSG_ONE, gmsgPortal, NULL, pev);
+		//WRITE_BYTE(m_pPortal[0]->entindex()); // first portal;
+		WRITE_COORD(m_pPortal[0]->pev->origin.x); // coord;
+		WRITE_COORD(m_pPortal[0]->pev->origin.y); // coord;
+		WRITE_COORD(m_pPortal[0]->pev->origin.z); // coord;
+		WRITE_COORD(m_pPortal[0]->pev->angles.x); // angle;
+		WRITE_COORD(m_pPortal[0]->pev->angles.y); // angle;
+		WRITE_COORD(m_pPortal[0]->pev->angles.z); // angle;
+
+		//WRITE_BYTE(m_pPortal[1]->entindex()); // second portal;
+		WRITE_COORD(m_pPortal[1]->pev->origin.x); // coord;
+		WRITE_COORD(m_pPortal[1]->pev->origin.y); // coord;
+		WRITE_COORD(m_pPortal[1]->pev->origin.z); // coord;
+		WRITE_COORD(m_pPortal[1]->pev->angles.x); // angle;
+		WRITE_COORD(m_pPortal[1]->pev->angles.y); // angle;
+		WRITE_COORD(m_pPortal[1]->pev->angles.z); // angle;
+		MESSAGE_END();
+	}
+	else
+	{
+		MESSAGE_BEGIN(MSG_ONE, gmsgPortal, NULL, pev);
+		WRITE_BYTE(0); // first portal;
+		WRITE_BYTE(0); // second portal;
+		MESSAGE_END();
+	}
+
 	// HACKHACK -- send the message to display the game title
 	//TODO: will not work properly in multiplayer
 	if (gDisplayTitle)

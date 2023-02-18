@@ -495,6 +495,13 @@ public:
 	GLuint portalPass_1;
 	GLuint portalPass_2;
 	bool m_bIsDrawingPortal;
+
+	int portal1index;
+	int portal2index;
+
+	Vector m_Portal1[2]; // origin, angle
+	Vector m_Portal2[2]; // origin, angle
+
 };
 
 

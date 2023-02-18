@@ -132,6 +132,40 @@ int __MsgFunc_GameMode(const char* pszName, int iSize, void* pbuf)
 	return static_cast<int>(gHUD.MsgFunc_GameMode(pszName, iSize, pbuf));
 }
 
+int __MsgFunc_Portal(const char* pszName, int iSize, void* pbuf)
+{
+	BEGIN_READ(pbuf, iSize);
+	//gPortalRenderer.portal1index = READ_BYTE();
+	//gPortalRenderer.portal2index = READ_BYTE();
+
+	Vector portal1org;
+	for (int i = 0; i < 3; i++)
+		portal1org[i] = READ_COORD();
+
+	Vector portal1ang;
+	for (int i = 0; i < 3; i++)
+		portal1ang[i] = READ_COORD();
+
+	Vector portal2org;
+	for (int i = 0; i < 3; i++)
+		portal2org[i] = READ_COORD();
+
+	Vector portal2ang;
+	for (int i = 0; i < 3; i++)
+		portal2ang[i] = READ_COORD();
+
+	gPortalRenderer.m_Portal1[0] = portal1org;
+	gPortalRenderer.m_Portal1[1] = portal1ang;
+
+	gPortalRenderer.m_Portal2[0] = portal2org;
+	gPortalRenderer.m_Portal2[1] = portal2ang;
+
+	// set rendering status
+	gPortalRenderer.m_bIsDrawingPortal = portal1org != vec3_origin && portal2org != vec3_origin;
+
+	return 1;
+}
+
 // TFFree Command Menu
 void __CmdFunc_OpenCommandMenu()
 {
@@ -290,6 +324,8 @@ void CHud::Init()
 	HOOK_MESSAGE(SetFOV);
 	HOOK_MESSAGE(Concuss);
 	HOOK_MESSAGE(Weapons);
+
+	HOOK_MESSAGE(Portal);
 
 	// TFFree CommandMenu
 	HOOK_COMMAND("+commandmenu", OpenCommandMenu);
