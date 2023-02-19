@@ -409,6 +409,8 @@ void CHud::Init()
 
 	m_Menu.Init();
 
+	gPortalRenderer.Init();
+
 	MsgFunc_ResetHUD(0, 0, NULL);
 }
 

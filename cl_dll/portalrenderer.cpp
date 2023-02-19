@@ -30,6 +30,8 @@
 #include <string.h>
 #include "cl_entity.h"
 #include "com_model.h"
+#include "triangleapi.h"
+
 #include "PlatformHeaders.h"
 #include "SDL2/SDL.h"
 #include <gl/GL.h>
@@ -87,27 +89,57 @@ void CPortalRenderer::DrawPortal()
 {
 	R_SetupScreenStuff();
 
-	glViewport(0, 0, 200, 200);
-	glBindTexture(GL_TEXTURE_RECTANGLE_NV, portalPass_1);
-	glBegin(GL_QUADS);
-	DrawQuad(ScreenWidth, ScreenHeight, 0, 0);
-	glEnd();
+	// =========== FIRST PORTAL =========== 
 
-	glViewport(200, 0, 200, 200);
-	glBindTexture(GL_TEXTURE_RECTANGLE_NV, portalPass_2);
-	glBegin(GL_QUADS);
-	DrawQuad(ScreenWidth, ScreenHeight, 0, 0);
-	glEnd();
+	Vector angle = gEngfuncs.GetLocalPlayer()->curstate.angles;
+	Vector forward;
+	AngleVectors(angle, forward, nullptr, nullptr);
+	Vector vecdir = gPortalRenderer.m_Portal1[0] - gEngfuncs.GetLocalPlayer()->curstate.origin;
+	vecdir.z = 0;
 
-	glViewport(0, 0, ScreenWidth, ScreenHeight);
+	// World2Screen conversion
+	float screen[2];
+	gEngfuncs.pTriAPI->WorldToScreen(gPortalRenderer.m_Portal1[0], screen);
+	int x = XPROJECT(screen[0]);
+	int y = YPROJECT(screen[1]);
 
-	if (CVAR_GET_FLOAT("normalscreen") == 1)
+	int height = 500;
+	int width = 300;
+	y = (ScreenHeight / 2) - y + height; // ???? what the fuck
+
+	// check if its out from player's view
+	if (DotProduct(forward, vecdir) > 45)
 	{
-		glBindTexture(GL_TEXTURE_RECTANGLE_NV, screenpass);
+		glViewport(x - width / 2, y - height / 2, width, height);
+		glBindTexture(GL_TEXTURE_RECTANGLE_NV, portalPass_1);
 		glBegin(GL_QUADS);
-		DrawQuad(ScreenWidth, ScreenHeight, 0, 0);
+		DrawQuad(width, height, x - width / 2, y - height / 2);
 		glEnd();
 	}
+
+	// =========== SECOND PORTAL =========== 
+
+	vecdir = gPortalRenderer.m_Portal2[0] - gEngfuncs.GetLocalPlayer()->curstate.origin;
+	vecdir.z = 0;
+
+	// World2Screen conversion
+	gEngfuncs.pTriAPI->WorldToScreen(gPortalRenderer.m_Portal2[0], screen);
+	x = XPROJECT(screen[0]);
+	y = YPROJECT(screen[1]);
+
+	y = (ScreenHeight / 2) - y + height; // ???? what the fuck
+
+	// check if its out from player's view
+	if (DotProduct(forward, vecdir) > 45)
+	{
+		glViewport(x - width / 2, y - height / 2, width, height);
+		glBindTexture(GL_TEXTURE_RECTANGLE_NV, portalPass_2);
+		glBegin(GL_QUADS);
+		DrawQuad(width, height, x - width / 2, y - height / 2);
+		glEnd();
+	}
+
+	glViewport(0, 0, ScreenWidth, ScreenHeight);
 
 	R_ResetScreenStuff();
 }
