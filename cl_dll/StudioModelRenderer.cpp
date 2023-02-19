@@ -1579,6 +1579,14 @@ void CStudioModelRenderer::StudioCalcAttachments()
 	{
 		VectorTransform(pattachment[i].org, (*m_plighttransform)[pattachment[i].bone], m_pCurrentEntity->attachment[i]);
 	}
+
+	if (!strcmp(m_pCurrentEntity->model->name, "models/portal/portal.mdl"))
+	{
+		for (int i = 0; i < 4; i++)
+		{
+			gPortalRenderer.m_PortalVertex[m_pCurrentEntity->curstate.skin][i] = m_pCurrentEntity->attachment[i];
+		}
+	}
 }
 
 /*

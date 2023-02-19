@@ -867,7 +867,7 @@ void V_CalcNormalRefdef(struct ref_params_s* pparams)
 
 			gHUD.portal1finalorg = teleportOrg;
 		}
-		gEngfuncs.Con_Printf("portal 1 pass\n");
+		//gEngfuncs.Con_Printf("portal 1 pass\n");
 		pparams->nextView = 1;
 		renderpass = 1;
 		return;
@@ -904,7 +904,7 @@ void V_CalcNormalRefdef(struct ref_params_s* pparams)
 
 			gHUD.portal2finalorg = teleportOrg;
 		}
-		gEngfuncs.Con_Printf("portal 2 pass\n");
+		//gEngfuncs.Con_Printf("portal 2 pass\n");
 		renderpass = 2;
 		pparams->nextView = 2;
 		return;
@@ -923,7 +923,7 @@ void V_CalcNormalRefdef(struct ref_params_s* pparams)
 		pparams->vieworg[0] = v_origin.x;
 		pparams->vieworg[1] = v_origin.y;
 		pparams->vieworg[2] = v_origin.z;
-		gEngfuncs.Con_Printf("world pass\n");
+		//gEngfuncs.Con_Printf("world pass\n");
 		pparams->nextView = 3;
 		renderpass = 3;
 		return;
@@ -933,7 +933,7 @@ void V_CalcNormalRefdef(struct ref_params_s* pparams)
 	{
 		// Capture screen
 		glFinish();
-		//gPortalRenderer.CapturePortalView(2);
+		gPortalRenderer.CapturePortalView(2);
 		pparams->nextView = 0;
 		renderpass = 0;
 	}

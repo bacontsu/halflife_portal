@@ -503,6 +503,7 @@ public:
 	Vector m_Portal1[2]; // origin, angle
 	Vector m_Portal2[2]; // origin, angle
 
+	Vector m_PortalVertex[2][4];
 };
 
 

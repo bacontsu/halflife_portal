@@ -76,6 +76,13 @@ void CPortalRenderer::Init()
 	glTexParameteri(GL_TEXTURE_RECTANGLE_NV, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexImage2D(GL_TEXTURE_RECTANGLE_NV, 0, GL_RGB8, ScreenWidth, ScreenHeight, 0, GL_RGB8, GL_UNSIGNED_BYTE, pBlankTex);
 
+	// Create the SCREEN-HOLDING TEXTURE
+	glGenTextures(1, &screenpass);
+	glBindTexture(GL_TEXTURE_RECTANGLE_NV, portalPass_2);
+	glTexParameteri(GL_TEXTURE_RECTANGLE_NV, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_RECTANGLE_NV, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexImage2D(GL_TEXTURE_RECTANGLE_NV, 0, GL_RGB8, ScreenWidth, ScreenHeight, 0, GL_RGB8, GL_UNSIGNED_BYTE, pBlankTex);
+
 	// free the memory
 	delete[] pBlankTex;
 }
@@ -103,9 +110,29 @@ void CPortalRenderer::DrawPortal()
 	int x = XPROJECT(screen[0]);
 	int y = YPROJECT(screen[1]);
 
-	int height = 500;
-	int width = 300;
-	y = (ScreenHeight / 2) - y + height; // ???? what the fuck
+	float vertex[2];
+	gEngfuncs.pTriAPI->WorldToScreen(gPortalRenderer.m_PortalVertex[0][0], vertex);
+	int screenvertexX = XPROJECT(vertex[0]);
+	int screenvertexY = YPROJECT(vertex[1]);
+
+	Vector2D firstVertex(screenvertexX, screenvertexY);
+
+	gEngfuncs.pTriAPI->WorldToScreen(gPortalRenderer.m_PortalVertex[0][1], vertex);
+	screenvertexX = XPROJECT(vertex[0]);
+	screenvertexY = YPROJECT(vertex[1]);
+
+	Vector2D secondVertex(screenvertexX, screenvertexY);
+
+	gEngfuncs.pTriAPI->WorldToScreen(gPortalRenderer.m_PortalVertex[0][2], vertex);
+	screenvertexX = XPROJECT(vertex[0]);
+	screenvertexY = YPROJECT(vertex[1]);
+
+	Vector2D thirdVertex(screenvertexX, screenvertexY);
+
+	int height = (int)Vector2D(firstVertex - thirdVertex).Length();
+	int width = (int)Vector2D(firstVertex - secondVertex).Length();
+
+	y = ScreenHeight/2;
 
 	// check if its out from player's view
 	if (DotProduct(forward, vecdir) > 45)
@@ -127,7 +154,30 @@ void CPortalRenderer::DrawPortal()
 	x = XPROJECT(screen[0]);
 	y = YPROJECT(screen[1]);
 
-	y = (ScreenHeight / 2) - y + height; // ???? what the fuck
+	gEngfuncs.pTriAPI->WorldToScreen(gPortalRenderer.m_PortalVertex[1][0], vertex);
+	screenvertexX = XPROJECT(vertex[0]);
+	screenvertexY = YPROJECT(vertex[1]);
+
+	firstVertex = Vector2D(screenvertexX, screenvertexY);
+
+	gEngfuncs.pTriAPI->WorldToScreen(gPortalRenderer.m_PortalVertex[1][1], vertex);
+	screenvertexX = XPROJECT(vertex[0]);
+	screenvertexY = YPROJECT(vertex[1]);
+
+	secondVertex = Vector2D(screenvertexX, screenvertexY);
+
+	gEngfuncs.pTriAPI->WorldToScreen(gPortalRenderer.m_PortalVertex[1][2], vertex);
+	screenvertexX = XPROJECT(vertex[0]);
+	screenvertexY = YPROJECT(vertex[1]);
+
+	thirdVertex = Vector2D(screenvertexX, screenvertexY);
+
+	height = (int)Vector2D(firstVertex - thirdVertex).Length();
+	width = (int)Vector2D(firstVertex - secondVertex).Length();
+
+	y = ScreenHeight / 2;
+
+	//y = (ScreenHeight / 2) - y + height/2; // ???? what the fuck
 
 	// check if its out from player's view
 	if (DotProduct(forward, vecdir) > 45)
