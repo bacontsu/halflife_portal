@@ -916,6 +916,21 @@ void V_CalcNormalRefdef(struct ref_params_s* pparams)
 		glFinish();
 		gPortalRenderer.CapturePortalView(1);
 
+		pparams->vieworg[0] = 8292;
+		pparams->vieworg[1] = 8292;
+		pparams->vieworg[2] = 8292;
+
+		pparams->nextView = 3;
+		renderpass = 3;
+		return;
+	}
+
+	if (renderpass == 3 && pparams->nextView == 3)
+	{
+		// Capture blank
+		glFinish();
+		gPortalRenderer.CapturePortalView(3);
+
 		// reset player view
 		pparams->viewangles[0] = v_angles.x;
 		pparams->viewangles[1] = v_angles.y;
@@ -924,12 +939,12 @@ void V_CalcNormalRefdef(struct ref_params_s* pparams)
 		pparams->vieworg[1] = v_origin.y;
 		pparams->vieworg[2] = v_origin.z;
 		//gEngfuncs.Con_Printf("world pass\n");
-		pparams->nextView = 3;
-		renderpass = 3;
+		pparams->nextView = 4;
+		renderpass = 4;
 		return;
 	}
 
-	if (renderpass == 3 && pparams->nextView == 3)
+	if (renderpass == 4 && pparams->nextView == 4)
 	{
 		// Capture screen
 		glFinish();

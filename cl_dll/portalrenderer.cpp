@@ -78,10 +78,31 @@ void CPortalRenderer::Init()
 
 	// Create the SCREEN-HOLDING TEXTURE
 	glGenTextures(1, &screenpass);
-	glBindTexture(GL_TEXTURE_RECTANGLE_NV, portalPass_2);
+	glBindTexture(GL_TEXTURE_RECTANGLE_NV, screenpass);
 	glTexParameteri(GL_TEXTURE_RECTANGLE_NV, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_RECTANGLE_NV, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexImage2D(GL_TEXTURE_RECTANGLE_NV, 0, GL_RGB8, ScreenWidth, ScreenHeight, 0, GL_RGB8, GL_UNSIGNED_BYTE, pBlankTex);
+
+	// Create the SCREEN-HOLDING TEXTURE
+	glGenTextures(1, &finalPortal[0]);
+	glBindTexture(GL_TEXTURE_2D, finalPortal[0]);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, ScreenWidth, ScreenHeight, 0, GL_RGB8, GL_UNSIGNED_BYTE, pBlankTex);
+
+	// Create the SCREEN-HOLDING TEXTURE
+	glGenTextures(1, &finalPortal[1]);
+	glBindTexture(GL_TEXTURE_2D, finalPortal[1]);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, ScreenWidth, ScreenHeight, 0, GL_RGB8, GL_UNSIGNED_BYTE, pBlankTex);
+
+	// Create the SCREEN-HOLDING TEXTURE
+	glGenTextures(1, &blankshit);
+	glBindTexture(GL_TEXTURE_2D, blankshit);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, ScreenWidth, ScreenHeight, 0, GL_RGB8, GL_UNSIGNED_BYTE, pBlankTex);
 
 	// free the memory
 	delete[] pBlankTex;
@@ -132,7 +153,7 @@ void CPortalRenderer::DrawPortal()
 	int height = (int)Vector2D(firstVertex - thirdVertex).Length();
 	int width = (int)Vector2D(firstVertex - secondVertex).Length();
 
-	y = ScreenHeight/2;
+	y = ScreenHeight - y;
 
 	// check if its out from player's view
 	if (DotProduct(forward, vecdir) > 45)
@@ -142,6 +163,13 @@ void CPortalRenderer::DrawPortal()
 		glBegin(GL_QUADS);
 		DrawQuad(width, height, x - width / 2, y - height / 2);
 		glEnd();
+
+		glBindTexture(GL_TEXTURE_2D, finalPortal[0]);
+		glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 0, 0, width, height, 0);
+
+		portalSize[0].x = width;
+		portalSize[0].y = height;
+
 	}
 
 	// =========== SECOND PORTAL =========== 
@@ -175,9 +203,11 @@ void CPortalRenderer::DrawPortal()
 	height = (int)Vector2D(firstVertex - thirdVertex).Length();
 	width = (int)Vector2D(firstVertex - secondVertex).Length();
 
-	y = ScreenHeight / 2;
+	//y = ScreenHeight / 2;
 
 	//y = (ScreenHeight / 2) - y + height/2; // ???? what the fuck
+
+	y = ScreenHeight - y;
 
 	// check if its out from player's view
 	if (DotProduct(forward, vecdir) > 45)
@@ -187,9 +217,20 @@ void CPortalRenderer::DrawPortal()
 		glBegin(GL_QUADS);
 		DrawQuad(width, height, x - width / 2, y - height / 2);
 		glEnd();
+
+		glBindTexture(GL_TEXTURE_2D, finalPortal[1]);
+		glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 0, 0, width, height, 0);
+
+		portalSize[1].x = width;
+		portalSize[1].y = height;
 	}
 
 	glViewport(0, 0, ScreenWidth, ScreenHeight);
+
+	glBindTexture(GL_TEXTURE_RECTANGLE_NV, screenpass);
+	glBegin(GL_QUADS);
+	DrawQuad(ScreenWidth, ScreenHeight, 0, 0);
+	glEnd();
 
 	R_ResetScreenStuff();
 }
@@ -202,8 +243,15 @@ void CPortalRenderer::CapturePortalView(int pass)
 		glBindTexture(GL_TEXTURE_RECTANGLE_NV, portalPass_1);
 	else if (pass == 1)
 		glBindTexture(GL_TEXTURE_RECTANGLE_NV, portalPass_2);
-	else
+	else if (pass == 2)
 		glBindTexture(GL_TEXTURE_RECTANGLE_NV, screenpass);
+	else
+	{
+		glBindTexture(GL_TEXTURE_2D, blankshit);
+		glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 0, 0, 10, 10, 0);
+		R_ResetScreenStuff();
+		return;
+	}
 
 	glCopyTexImage2D(GL_TEXTURE_RECTANGLE_NV, 0, GL_RGBA8, 0, 0, ScreenWidth, ScreenHeight, 0);
 	R_ResetScreenStuff();

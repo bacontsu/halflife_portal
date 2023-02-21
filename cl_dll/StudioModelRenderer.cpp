@@ -33,6 +33,9 @@ extern extra_player_info_t g_PlayerExtraInfo[MAX_PLAYERS_HUD + 1];
 
 int m_nPlayerGaitSequences[MAX_PLAYERS];
 
+#define GL_CLAMP_TO_EDGE 0x812F
+static GLuint g_iBlankTex = 0;
+
 // Global engine <-> studio model rendering code interface
 engine_studio_api_t IEngineStudio;
 
@@ -61,6 +64,17 @@ void CStudioModelRenderer::Init()
 	m_plighttransform = (float(*)[MAXSTUDIOBONES][3][4])IEngineStudio.StudioGetLightTransform();
 	m_paliastransform = (float(*)[3][4])IEngineStudio.StudioGetAliasTransform();
 	m_protationmatrix = (float(*)[3][4])IEngineStudio.StudioGetRotationMatrix();
+
+	GLubyte pixels[3] = {0, 0, 0};
+
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+	glGenTextures(1, &g_iBlankTex);
+	glBindTexture(GL_TEXTURE_2D, g_iBlankTex);
+
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 1, 1, 0, GL_RGB, GL_UNSIGNED_BYTE, pixels);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 }
 
 /*
@@ -1212,6 +1226,53 @@ bool CStudioModelRenderer::StudioDrawModel(int flags)
 
 
 		IEngineStudio.StudioSetRemapColors(m_nTopColor, m_nBottomColor);
+
+		if (!strcmp(m_pCurrentEntity->model->name, "models/portal/portal.mdl"))
+		{
+			studiohdr_t* pHdr = (studiohdr_t*)m_pStudioHeader;
+			mstudiotexture_t* pTexture = (mstudiotexture_t*)((byte*)m_pRenderModel->cache.data + pHdr->textureindex);
+
+			std::vector<mstudiotexture_t> savedtexture;
+
+			if (pHdr->textureindex > 0)
+			{
+				for (int i = 0; i < pHdr->numtextures; i++)
+				{
+					savedtexture.push_back(pTexture[i]);
+					// memcpy(&pTexture[i], &pTexture[pHdr->numtextures + 1], sizeof(mstudiotexture_t));
+					if (!strcmp(pTexture[i].name, "lul2.bmp"))
+					{
+						pTexture[i].index = gPortalRenderer.blankshit;
+						//pTexture[i].width = gPortalRenderer.portalSize[0].x;
+						//pTexture[i].height = -gPortalRenderer.portalSize[0].y;
+					}
+					else if (!strcmp(pTexture[i].name, "lul.bmp"))
+					{
+						pTexture[i].index = gPortalRenderer.blankshit;
+						//pTexture[i].width = gPortalRenderer.portalSize[1].x;
+						//pTexture[i].height = -gPortalRenderer.portalSize[1].y;
+					}
+				}
+			}
+
+			alight_t lighting;
+			Vector dir;
+			lighting.plightvec = dir;
+
+			IEngineStudio.StudioDynamicLight(m_pCurrentEntity, &lighting);
+			IEngineStudio.StudioEntityLight(&lighting);
+			// model and frame independant
+			IEngineStudio.StudioSetupLighting(&lighting);
+
+			StudioRenderModel();
+
+			for (int i = 0; i < pHdr->numtextures; i++)
+			{
+				memcpy(&pTexture[i], &savedtexture[i], sizeof(mstudiotexture_t));
+			}
+
+			return true;
+		}
 
 		StudioRenderModel();
 	}

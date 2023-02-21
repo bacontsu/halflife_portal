@@ -495,6 +495,7 @@ public:
 	GLuint portalPass_1;
 	GLuint portalPass_2;
 	GLuint screenpass;
+	GLuint blankshit;
 	bool m_bIsDrawingPortal;
 
 	int portal1index;
@@ -504,6 +505,9 @@ public:
 	Vector m_Portal2[2]; // origin, angle
 
 	Vector m_PortalVertex[2][4];
+
+	GLuint finalPortal[2];
+	Vector2D portalSize[2];
 };
 
 
