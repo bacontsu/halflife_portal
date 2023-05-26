@@ -360,6 +360,8 @@ void CHud::Init()
 
 	CVAR_CREATE("normalscreen", "1", FCVAR_ARCHIVE);
 
+	m_pCvarDisablePortal = CVAR_CREATE("disableportalrendering", "0", FCVAR_ARCHIVE);
+
 	m_iLogo = 0;
 	m_iFOV = 0;
 

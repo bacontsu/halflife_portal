@@ -840,7 +840,7 @@ void V_CalcNormalRefdef(struct ref_params_s* pparams)
 
 	v_origin = pparams->vieworg;
 
-	if (gPortalRenderer.m_bIsDrawingPortal && pparams->nextView == 0)
+	if (gHUD.m_pCvarDisablePortal->value == 0 && gPortalRenderer.m_bIsDrawingPortal && pparams->nextView == 0)
 	{
 		// set view relative to second portal (from first portal view)
 		if (gPortalRenderer.m_Portal1[0] != vec3_origin && gPortalRenderer.m_Portal2[0] != vec3_origin)

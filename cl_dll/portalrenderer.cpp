@@ -115,6 +115,9 @@ void CPortalRenderer::VidInit()
 
 void CPortalRenderer::DrawPortal()
 {
+	if (gHUD.m_pCvarDisablePortal->value != 0)
+		return;
+
 	R_SetupScreenStuff();
 
 	// =========== FIRST PORTAL =========== 
@@ -227,10 +230,10 @@ void CPortalRenderer::DrawPortal()
 
 	glViewport(0, 0, ScreenWidth, ScreenHeight);
 
-	glBindTexture(GL_TEXTURE_RECTANGLE_NV, screenpass);
-	glBegin(GL_QUADS);
-	DrawQuad(ScreenWidth, ScreenHeight, 0, 0);
-	glEnd();
+	//glBindTexture(GL_TEXTURE_RECTANGLE_NV, screenpass);
+	//glBegin(GL_QUADS);
+	//DrawQuad(ScreenWidth, ScreenHeight, 0, 0);
+	//glEnd();
 
 	R_ResetScreenStuff();
 }

@@ -1227,7 +1227,7 @@ bool CStudioModelRenderer::StudioDrawModel(int flags)
 
 		IEngineStudio.StudioSetRemapColors(m_nTopColor, m_nBottomColor);
 
-		if (!strcmp(m_pCurrentEntity->model->name, "models/portal/portal.mdl"))
+		if (gHUD.m_pCvarDisablePortal->value == 0 && !strcmp(m_pCurrentEntity->model->name, "models/portal/portal.mdl"))
 		{
 			studiohdr_t* pHdr = (studiohdr_t*)m_pStudioHeader;
 			mstudiotexture_t* pTexture = (mstudiotexture_t*)((byte*)m_pRenderModel->cache.data + pHdr->textureindex);
