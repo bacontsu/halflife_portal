@@ -2338,9 +2338,15 @@ void CPortalEntity::Think()
 						Vector rightSpeedOffset = right * pFound->pev->velocity.y;
 						Vector upSpeedOffset;
 
+						// check if the other portal is facign down of us, hacky hacky time
+						float otherPortalAngle = pOtherPortalCasted->pev->angles.x;
+						ALERT(at_console, "angle: %f\n", otherPortalAngle);
+
 						// Apply the offsetting
+						Vector otherPortalForward;
+						AngleVectors(pOtherPortalCasted->pev->angles, &otherPortalForward, nullptr, nullptr);
 						teleportOrg = teleportOrg + forwardOffset + rightOffset + upOffset;
-						teleportOrg = teleportOrg + forward * 20;
+						teleportOrg = teleportOrg + ((otherPortalAngle > 180 && otherPortalAngle < 360) ? up * -130 : otherPortalForward * 30);
 						teleportOrg.z += 20.0f;
 
 						// Move someone who touched this
@@ -2348,7 +2354,7 @@ void CPortalEntity::Think()
 						pFound->pev->fixangle = 1;
 						pFound->pev->v_angle.y = pFound->pev->angles.y = pFound->pev->angles.y + 180 + (pOtherPortalCasted->pev->angles.y - pev->angles.y); 
 						pFound->pev->velocity = forwardSpeedOffset + rightSpeedOffset + Vector(0, 0, pFound->pev->velocity.z);
-						this->m_flPortalCooldown = pOtherPortalCasted->m_flPortalCooldown = gpGlobals->time + 0.5f;
+						this->m_flPortalCooldown = pOtherPortalCasted->m_flPortalCooldown = gpGlobals->time + 0.2f;
 					
 					}
 				}
