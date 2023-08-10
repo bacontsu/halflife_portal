@@ -2344,10 +2344,17 @@ void CPortalEntity::Think()
 
 						// Apply the offsetting
 						Vector otherPortalForward;
-						AngleVectors(pOtherPortalCasted->pev->angles, &otherPortalForward, nullptr, nullptr);
+						Vector ang = Vector(0, pOtherPortalCasted->pev->angles.y, 0);
+						AngleVectors(ang, &otherPortalForward, nullptr, nullptr);
 						teleportOrg = teleportOrg + forwardOffset + rightOffset + upOffset;
 						teleportOrg = teleportOrg + ((otherPortalAngle > 180 && otherPortalAngle < 360) ? up * -130 : otherPortalForward * 30);
-						teleportOrg.z += 20.0f;
+						teleportOrg.z += 10.0f;
+
+						if (otherPortalAngle > 45 && otherPortalAngle < 135)
+						{
+							teleportOrg = teleportOrg + Vector(0,0,25);
+							pFound->pev->velocity = pFound->pev->velocity + Vector(0, 0, 300);
+						}
 
 						// Move someone who touched this
 						UTIL_SetOrigin(pFound->pev, teleportOrg);
